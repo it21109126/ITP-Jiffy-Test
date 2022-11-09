@@ -1,7 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import SearchBar from './SearchBar'
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 function Customers() {
+
+  //* Modal Popup
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => {
+    setShow(false)
+  };
+
+  const handleShow = () => setShow(true);
+
   const navigate = useNavigate()
 
   const [name, setName] = useState('')
@@ -11,6 +24,11 @@ function Customers() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [errorPosition, setErrorPosition] = useState(null)
+
+  const [filteredCustomers, setFilteredCustomers] = useState(null)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [searchCategory, setSearchCategory] = useState("")
+  const isMounted = useRef(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -39,7 +57,8 @@ function Customers() {
       setPassword('')
       setError(null)
       console.log('new user added', json)
-      window.location.reload();
+      handleShow()
+
     }
   }
 
@@ -68,7 +87,6 @@ function Customers() {
       const response = await fetch(`/api/users`)
       const json = await response.json()
       console.log(json)
-      //console.log(json[0])
       if (response.ok) {
         setCustomers(json)
       }
@@ -77,8 +95,64 @@ function Customers() {
     fetchCustomers()
   }, [])
 
+  useEffect(() => {
+
+    if (searchTerm !== "") {
+      const handleSearch = (data) => {
+
+        let term;
+
+        if (searchTerm !== null) {
+          term = searchTerm.replace(/[^a-zA-Z0-9_ \d]/, '');
+          console.log(term);
+        }
+
+
+        const regExp = new RegExp(term, "i");
+        console.log(regExp);
+        //*If search category is emp name
+        if (searchCategory === "name") {
+          if (data) {
+            const filteredCustomers = data.filter(data => data.name.match(regExp));
+            setFilteredCustomers(filteredCustomers);
+          }
+        }//*If search category is emp role
+        else if (searchCategory === "email") {
+          if (data) {
+            const filteredCustomers = data.filter(data => data.email.match(regExp));
+            setFilteredCustomers(filteredCustomers);
+          }
+        }
+      }
+      handleSearch(customers);
+
+    }
+  }, [searchCategory, searchTerm]);
+
+  const getSearchTerm = (data) => {
+    setSearchTerm(data)
+  }
+
+  //* Get search category from Search Bar Component
+  const getSearchCategory = (data) => {
+    setSearchCategory(data);
+  }
+
+
   return (
+
     <main id="main" className="main">
+
+      <Modal show={show} onHide={handleClose} backdrop="static" keyboard={false} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Customer Added Successfully</Modal.Title>
+        </Modal.Header>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => { window.location.reload() }}>
+            Okay
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <div className="pagetitle">
         <h1>Customer List</h1>
@@ -138,14 +212,14 @@ function Customers() {
                                       <input type="email" className="form-control" id="inputEmail"
                                         onChange={(e) => setEmail(e.target.value)} value={email} />
                                       {error && errorPosition === '3' ?
-                                        <div style={{ color: 'red' }}><b>*{error}*</b></div> : ""}
+                                        <div style={{ color: 'red' }}><b>{error}</b></div> : ""}
                                     </div>
                                     <div className="col-12">
                                       <label for="inputPhone" className="form-label">Phone</label>
                                       <input type="text" className="form-control" id="inputPhone"
                                         onChange={(e) => setPhone(e.target.value)} value={phone} />
                                       {error && errorPosition === '4' ?
-                                        <div style={{ color: 'red' }}><b>*{error}*</b></div> : ""}
+                                        <div style={{ color: 'red' }}><b>{error}</b></div> : ""}
                                     </div>
                                     <div className="col-12">
                                       <label for="inputAddress" className="form-label">Address</label>
@@ -157,7 +231,7 @@ function Customers() {
                                       <input type="password" className="form-control" id="inputPassword"
                                         onChange={(e) => setPassword(e.target.value)} value={password} />
                                       {error && errorPosition === '5' ?
-                                        <div style={{ color: 'red' }}><b>*{error}*</b></div> : ""}
+                                        <div style={{ color: 'red' }}><b>{error}</b></div> : ""}
                                     </div>
                                     <div className="text-center">
                                       <button type="submit" className="btn btn-primary">Add Customer</button>
@@ -186,7 +260,11 @@ function Customers() {
               <div className="card-body">
                 <h5 className="card-title">Customer List</h5>
 
-                {/* <!-- Default Table --> */}
+                <SearchBar
+                  searchTerm={getSearchTerm}
+                  searchCategory={getSearchCategory}
+                />
+
                 <table className="table">
                   <thead>
                     <tr>
@@ -195,11 +273,18 @@ function Customers() {
                       <th scope="col">Email</th>
                       <th scope="col">Phone</th>
                       <th scope="col"></th>
-                      <th scope="col"></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {customers && customers.map((customer) => (
+                    {searchTerm === "" ? customers && customers.map((customer) => (
+                      <tr key={customer._id}>
+                        <th scope="row">{customer._id}</th>
+                        <td>{customer.name}</td>
+                        <td>{customer.email}</td>
+                        <td>{customer.phone}</td>
+                        <td><Link to={{ pathname: `/customer/${customer._id}` }}>View Profile</Link></td>
+                      </tr>
+                    )) : filteredCustomers && filteredCustomers.map((customer) => (
                       <tr key={customer._id}>
                         <th scope="row">{customer._id}</th>
                         <td>{customer.name}</td>
@@ -216,7 +301,7 @@ function Customers() {
                                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                  This process can not be undone.                                  
+                                  This process can not be undone.
                                 </div>
                                 <div class="modal-footer">
                                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -230,7 +315,6 @@ function Customers() {
                     ))}
                   </tbody>
                 </table>
-                {/* <!-- End Default Table Example --> */}
               </div>
             </div>
           </div>

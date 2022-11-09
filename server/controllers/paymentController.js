@@ -1,6 +1,7 @@
 const User = require('../models/User')
 const mongoose = require('mongoose')
 const Payment = require('../models/payment');
+var sendEmail = require('../utils/sendEmail')
 
 const createPayment = async (req, res) => {
     const payment = new Payment({
@@ -13,8 +14,9 @@ const createPayment = async (req, res) => {
         Card_CVC :req.body.cvc
     
     });
-
+    
     await payment.save();
+    sendEmail(req.body.email, 'Payment successfull', 'Your payment was completed successfully.')
     res.send(payment);
 };
 
@@ -38,6 +40,7 @@ const updatePayment = async (req, res) => {
         },
         {new:true}
         );
+        sendEmail(req.body.email, 'Payment successfull', 'Your payment was completed successfully.')
         res.send(payment);
 };
 

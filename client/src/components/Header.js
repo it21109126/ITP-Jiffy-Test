@@ -26,13 +26,15 @@ function Header() {
                         <div class="col header-menu-column menu-color-white">
                             <div class="header-menu d-none d-xl-block">
                                 <nav>
-                                    <div class="ltn__main-menu">
+                                <div className="ltn__main-menu">
                                         <ul>
-                                            <li><a href="#">Home</a>
+                                            <li><a href="/">Home</a>
+
                                             </li>
-                                            <li><a href="#">Shop</a>
+                                            <li ><a href="/products">Shop</a>
+
                                             </li>
-                                            <li><a href="#">Contact</a></li>
+                                            <li><a href="/">Contact</a></li>
                                         </ul>
                                     </div>
                                 </nav>
@@ -42,7 +44,7 @@ function Header() {
                             <div class="ltn__drop-menu user-menu">
                                 <ul>
                                     <li>
-                                        <a href="#"><i class="icon-user"></i></a>
+                                        <a href=""><i class="icon-user"></i></a>
                                         <ul>
                                             {!user && (
                                                 <>

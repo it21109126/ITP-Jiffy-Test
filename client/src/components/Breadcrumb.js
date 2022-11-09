@@ -11,7 +11,13 @@ if((window.location.href).indexOf("account")>-1){
     path = 'Sign in'
 }else if((window.location.href).indexOf("AddCustomerPayment")>-1){
     path = 'Payment method'
+}else if((window.location.href).indexOf("products")>-1){
+    path = 'Products'
+}else if((window.location.href).indexOf("product-overview")>-1){
+    path = 'Product Overview'
 }
+
+
 
 function Breadcrumb() {
     return(

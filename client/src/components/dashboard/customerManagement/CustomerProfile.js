@@ -31,14 +31,9 @@ function CustomerProfile() {
 
   useEffect(() => {
     const fetchCustomer = async () => {
-      // fetch(`/api/users/${id}`)
-      // .then(res => res.json)
-      // .then(data => setCustomer(data))
       const response = await fetch(`/api/users/${id}`)
       const json = await response.json()
-      //console.log(json["name"])
       if (response.ok) {
-        //console.log("json "+json["name"])
         setCustomer(
           {
             email: `${json["email"]}`,
@@ -98,6 +93,7 @@ function CustomerProfile() {
     const response = await fetch('http://localhost:5000/api/users/super-reset-password/' + id, {
       method: 'PATCH',
       body: JSON.stringify({
+        email: customer.email,
         newPassword: newPassword,
         confirmPassword: confirmPassword
       }),
@@ -149,13 +145,11 @@ function CustomerProfile() {
         },
         {
           label: 'No',
-          //onClick: () => alert('Click No')
         }
       ]
     });
   }
 
-  //console.log("Customer bn "+customer)
 
   return (
     <main id="main" className="main">
@@ -189,9 +183,7 @@ function CustomerProfile() {
                     <button className="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">Edit Profile</button>
                   </li>
 
-                  <li className="nav-item">
-                    <button className="nav-link" data-bs-toggle="tab" data-bs-target="#profile-settings">Settings</button>
-                  </li>
+                  
 
                   <li className="nav-item">
                     <button className="nav-link" data-bs-toggle="tab" data-bs-target="#profile-change-password">Change Password</button>
@@ -275,40 +267,6 @@ function CustomerProfile() {
                     {/* <!-- End Profile Edit Form --> */}
 
                   </div>
-
-                  <div className="tab-pane fade pt-3" id="profile-settings">
-
-                    {/* <!-- Settings Form --> */}
-
-
-                    <div className="row mb-3">
-                      <label for="fullName" className="col-md-4 col-lg-3 col-form-label">Delete Account</label>
-                      <div className="col-md-8 col-lg-9">
-                        <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#verticalycentered">Delete Now</button>
-                      </div>
-                      <div class="modal fade" id="verticalycentered" tabindex="-1">
-                        <div class="modal-dialog modal-dialog-centered">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h5 class="modal-title">Vertically Centered</h5>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                              Non omnis incidunt qui sed occaecati magni asperiores est mollitia. Soluta at et reprehenderit. Placeat autem numquam et fuga numquam. Tempora in facere consequatur sit dolor ipsum. Consequatur nemo amet incidunt est facilis. Dolorem neque recusandae quo sit molestias sint dignissimos.
-                            </div>
-                            <div class="modal-footer">
-                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                              <button type="button" class="btn btn-primary" onClick={handleDeleteSubmit} data-bs-dismiss="modal">Delete</button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* <!-- End settings Form --> */}
-
-                  </div>
-
                   <div className="tab-pane fade pt-3" id="profile-change-password">
                     {/* <!-- Change Password Form --> */}
                     {error &&

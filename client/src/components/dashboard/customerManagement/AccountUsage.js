@@ -46,34 +46,33 @@ function AccountUsage() {
 
     const printChart = () => {
         const input = document.getElementById('saveChart');
-        html2canvas(input)
+        html2canvas(input, { scale: 2, logging: true, letterRendering: 1, useCORS: true })
             .then((canvas) => {
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF();
-                pdf.addImage(imgData, 'JPEG', 0, 0);
-                // pdf.output('dataurlnewwindow');
-                pdf.save("download.pdf");
-            })
-            ;
+                const imgWidth = 210;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                const imgData = canvas.toDataURL('img/svg');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                pdf.save("usage-report.pdf");
+            });
     }
 
     const printTable = () => {
         const input = document.getElementById('saveTable');
         html2canvas(input)
             .then((canvas) => {
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF();
-                pdf.addImage(imgData, 'JPEG', 0, 0);
-                // pdf.output('dataurlnewwindow');
+                const imgWidth = 210;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                const imgData = canvas.toDataURL('img/svg');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
                 pdf.save("oldAccounts.pdf");
-            })
-            ;
+            });
     }
 
     useEffect(() => {
         const fetchChartData = async () => {
             const { data } = await axios.get(`/api/users/usage`)
-            //console.log(data)
             console.log(data.map((item) => item.month))
 
             setChartData({
@@ -101,7 +100,6 @@ function AccountUsage() {
             const response = await fetch(`/api/users/old-users`)
             const json = await response.json()
             console.log(json)
-            //console.log(json[0])
             if (response.ok) {
                 setCustomers(json)
             }
@@ -128,12 +126,9 @@ function AccountUsage() {
                     <div class="row">
                         <div class="col-lg-1"></div>
                         <div class="col-lg-9">
-                            <div class="card">
-                            <center><button type="button" onClick={printChart} class="btn btn-primary btn-sm">Download as pdf</button></center>
-                                    
+                            <div class="card">     
                                 <div class="card-body" id="saveChart">
-                                    
-                                        <h5 class="card-title">Usage Chart ({parseInt(new Date().getFullYear())}-{parseInt(new Date().getFullYear()-1)})</h5>
+                                        <h5 class="card-title">Account Usage Chart - Jiffy (PVT) LTD ({parseInt(new Date().getFullYear())}-{parseInt(new Date().getFullYear()-1)})</h5>
                                         <div className="chart">
                                             <Line
                                                 data={chartData}
@@ -146,66 +141,11 @@ function AccountUsage() {
                                                 }}
                                             />
                                         </div>
-                                    
+                                        <button class="btn btn-primary" onClick={printChart}>Download as pdf</button>
                                 </div>
                             </div>
                         </div>
                         <div class="col-lg-1"></div>
-                    </div>
-                    <div className="col-lg-12">
-
-                        <div className="card">
-                            <center><button type="button" onClick={printTable} class="btn btn-primary btn-sm">Download as pdf</button></center>
-
-                            <div className="card-body" id="saveTable">
-                                <h5 className="card-title">Inactive Customer Accounts (Last login two years ago)</h5>
-                                {/* <!-- Default Table --> */}
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">ID</th>
-                                            <th scope="col">Name</th>
-                                            <th scope="col">Email</th>
-                                            <th scope="col">Phone</th>
-                                            <th scope="col"></th>
-                                            <th scope="col"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {customers && customers.map((customer) => (
-                                            <tr key={customer._id}>
-                                                <th scope="row">{customer._id}</th>
-                                                <td>{customer.name}</td>
-                                                <td>{customer.email}</td>
-                                                <td>{customer.phone}</td>
-                                                <td><Link to={{ pathname: `/customer/${customer._id}` }} data-html2canvas-ignore="true">View Profile</Link></td>
-                                                <td><div class="icon">
-                                                    <i class="bi bi-trash" data-bs-toggle="modal" data-bs-target={`#verticalycentered${customer._id}`} data-html2canvas-ignore="true"></i></div>
-                                                    <div class="modal fade" id={`verticalycentered${customer._id}`} tabindex="-1">
-                                                        <div class="modal-dialog modal-dialog-centered">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title">You are about to delete this account</h5>
-                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    This process can not be undone.
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                                    <button type="button" class="btn btn-primary" onClick={event => handleDeleteSubmit(customer._id)} data-bs-dismiss="modal">Delete</button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                                {/* <!-- End Default Table Example --> */}
-                            </div>
-                        </div>
                     </div>
                 </section >
             </main>

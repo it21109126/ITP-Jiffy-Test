@@ -3,6 +3,7 @@ import { useLogout } from '../hooks/useLogout'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuthContext } from '../hooks/useAuthContext'
 import axios from 'axios'
+import { toast } from "react-toastify";
 
 function CustomerAccount() {
     const navigate = useNavigate()
@@ -36,7 +37,6 @@ function CustomerAccount() {
     });
 
     console.log("User log " + user)
-    //var customer = null
     const [customer, setCustomer] = useState(
         {
             email: "",
@@ -51,14 +51,9 @@ function CustomerAccount() {
 
     useEffect(() => {
         const fetchCustomer = async () => {
-            // fetch(`/api/users/${id}`)
-            // .then(res => res.json)
-            // .then(data => setCustomer(data))
             const response = await fetch(`/api/users/${user.id}`)
             const json = await response.json()
-            //console.log(json["name"])
             if (response.ok) {
-                //console.log("json "+json["name"])
                 setCustomer(
                     {
                         email: `${json["email"]}`,
@@ -208,18 +203,34 @@ function CustomerAccount() {
         axios.delete(`http://localhost:5000/api/v3/payment/removePayment/${user.id}`)
             .then(() => {
             })
-        window.location = "/account"
+            toast.success(`Payment details removed successfully`,{
+                position: "bottom-left",
+            });
+            setTimeout(() => {
+              window.location = "/account"
+            }, 2000);
 
     }
 
+    const [userNameERR, setuserNameERR] = useState({});
     const [cardNumberERR, setCardNumberERR] = useState({});
     const [cvcNumberERR, setCvcNumberERR] = useState({});
     const [expireDateERR, setExpireERR] = useState({});
+    const [expireDateERR2, setExpireERR2] = useState({});
 
+     function isEmpty(txt) {
+        if (txt.length === 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     const formValidation = () => {
         const cardNumberERR = {};
         const cvcNumberERR = {};
-        const userName = {};
+        const expireDateERR = {};
+        const expireDateERR2 = {};
+        const userNameERR = {};
         let isValid = true;
 
         if (cvc.trim().length < 3) {
@@ -231,33 +242,80 @@ function CustomerAccount() {
             isValid = false;
         }
 
+        if (isNaN(cvc)) {
+            cvcNumberERR.cvcShort = "Invalid CVC Number!";
+            isValid = false;
+        }
+        if (cvc.trim().length == 0) {
+            cvcNumberERR.cvcShort = "Please Enter the CVC number!";
+            isValid = false;
+        }
+
         if (number.toString().length < 16) {
             cardNumberERR.numberShort = "Invalid Card Number!";
             isValid = false;
         }
 
-        if (isNaN(cvc)) {
-            cvcNumberERR.cvcShort = "Invalid CVC Number!";
-            isValid = false;
-        }
-
-
         if (isNaN(number)) {
             cardNumberERR.numberShort = "Invalid Card Number!";
             isValid = false;
         }
+        if (number.toString().length == 0) {
+            cardNumberERR.numberShort = "Please Enter Card Number!";
+            isValid = false;
+        }
+
+        if (isEmpty(Hname)) {
+            userNameERR.numberShort = "Please Enter User Name!";
+            isValid = false;
+        }
         const ex1 = String(expiry).slice(0, 2)
+        const ex2 = String(expiry).slice(3, 6)
+        const ex3 = String(expiry).slice(2, 3)
         const month = Number(ex1)
+        const year = Number(ex2)
+        const currentYear = String(new Date().getFullYear()).slice(2, 4);
+        const currentMonth = parseInt(new Date().getMonth() + 1)
+        const chkYR = parseInt(currentYear);
 
         if (month > 12) {
             expireDateERR.expireShort = "Invalid Expire Date!"
             isValid = false;
         }
 
+        if (ex3 != "/") {
+            expireDateERR.expireShort = "Invalid Expire Date!"
+            isValid = false;
+        }
+
+        if (isEmpty(expiry)) {
+            expireDateERR.expireShort = "Please Enter the expire date!"
+            isValid = false;
+        }
+        if (expiry.length != 0) {
+            if (month <= 12) {
+                if (ex3 == "/") {
+                    if (year < chkYR) {
+                        expireDateERR2.expireShort = "Card is Expired! please check your card"
+                        isValid = false;
+                    }
+                    if (year == chkYR) {
+                        if (month <= currentMonth) {
+                            expireDateERR2.expireShort = "Card is Expired! please check your card"
+                            isValid = false;
+                        }
+                    }
+
+                }
+            }
+        }
+
+        console.log()
 
         setCvcNumberERR(cvcNumberERR);
         setCardNumberERR(cardNumberERR);
         setExpireERR(expireDateERR);
+        setExpireERR2(expireDateERR2);
         return isValid;
     }
 
@@ -270,7 +328,12 @@ function CustomerAccount() {
                     number, Hname, expiry, cvc
                 }
             )
-            window.location = "/account"
+            toast.success(`Order placed successfully `,{
+                position: "bottom-left",
+            });
+            setTimeout(() => {
+              window.location = "/account"
+            }, 2000);
         }
     }
 
@@ -279,7 +342,6 @@ function CustomerAccount() {
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
-                        {/* <!-- PRODUCT TAB AREA START --> */}
                         <div class="ltn__product-tab-area">
                             <div class="container">
                                 <div class="row">
@@ -348,39 +410,50 @@ function CustomerAccount() {
                                                                 <div className="col-md-12">
                                                                     <div className="form-floating">
                                                                         <h5>card Number</h5>
-                                                                        <input type="text" className="form-control" defaultValue={number} maxlength="16" onChange={(e) => setNumber(e.target.value)} name="number" placeholder="Card Number" />
-                                                                        {Object.keys(cardNumberERR).map((key) => {
-                                                                            return <div style={{ color: "red" }}>{cardNumberERR[key]}</div>
-                                                                        })}
+                                                                        <input type="text" className="form-control" defaultValue={number} maxlength="16" onChange={(e) => setNumber(e.target.value)} name="number" required />
+                                                                        <label htmlFor="rawMaterial" className="form-label">
+                                                                            {Object.keys(cardNumberERR).map((key) => {
+                                                                                return <div style={{ color: "red" }}>{cardNumberERR[key]}</div>
+                                                                            })}</label>
                                                                     </div>
                                                                 </div>
 
                                                                 <div className="col-md-12">
                                                                     <div className="form-floating">
                                                                         <h5>Card holder's name</h5>
-                                                                        <input type="text" className="form-control" defaultValue={Hname} maxlength="24" onChange={(e) => setHName(e.target.value)} name="Hname" placeholder="Card holder's name" />
+                                                                        <input type="text" className="form-control" defaultValue={Hname} maxlength="17" onChange={(e) => setHName(e.target.value)} name="Hname" required />
+                                                                        <label htmlFor="rawMaterial" className="form-label">
+                                                                            {Object.keys(userNameERR).map((key) => {
+                                                                                return <div style={{ color: "red" }}>{userNameERR[key]}</div>
+                                                                            })}
+                                                                        </label>
                                                                     </div>
                                                                 </div>
 
 
                                                                 <div className="col-md-6">
-                                                                    <h5>Expire date</h5>
+                                                                    <h5>Expire date (MM/YY)</h5>
                                                                     <div className="form-floating">
-                                                                        <input type="text" className="form-control" defaultValue={expiry} onChange={(e) => setExpiry(e.target.value)} name="expiredate" placeholder="Expire date" />
+                                                                        <input type="text" className="form-control" defaultValue={expiry} onChange={(e) => setExpiry(e.target.value)} name="expiredate" required />
+                                                                        <label htmlFor="rawMaterial" className="form-label">{Object.keys(expireDateERR).map((key) => {
+                                                                            return <div style={{ color: "red" }}>{expireDateERR[key]}</div>
+                                                                        })}
+                                                                            {Object.keys(expireDateERR2).map((key) => {
+                                                                                return <div style={{ color: "red" }}>{expireDateERR2[key]}</div>
+                                                                            })}
+
+                                                                        </label>
                                                                     </div>
                                                                 </div>
-                                                                {Object.keys(expireDateERR).map((key) => {
-                                                                    return <div style={{ color: "red" }}>{expireDateERR[key]}</div>
-                                                                })}
 
 
-                                                                <div className="col-md-2">
+                                                                <div className="col-md-3">
                                                                     <div className="form-floating">
                                                                         <h5>CVC </h5>
-                                                                        <input type="text" className="form-control" defaultValue={cvc} onChange={(e) => setCvc(e.target.value)} name="CVC" placeholder="Zip" />
-                                                                        {Object.keys(cvcNumberERR).map((key) => {
+                                                                        <input type="text" className="form-control" defaultValue={cvc} onChange={(e) => setCvc(e.target.value)} maxlength="3" name="CVC" required />
+                                                                        <label htmlFor="rawMaterial" className="form-label">{Object.keys(cvcNumberERR).map((key) => {
                                                                             return <div style={{ color: "red" }}>{cvcNumberERR[key]}</div>
-                                                                        })}
+                                                                        })}</label>
 
                                                                     </div>
                                                                 </div>
@@ -461,7 +534,6 @@ function CustomerAccount() {
                                             </div>
                                             <div class="tab-pane fade" id="liton_tab_1_5">
                                                 <div class="ltn__myaccount-tab-content-inner">
-                                                    <p>The following addresses will be used on the checkout page by default.</p>
                                                     <div class="ltn__form-box">
                                                         <form onSubmit={handleFeedbackSubmit}>
                                                             <div class="row mb-50">
@@ -483,7 +555,6 @@ function CustomerAccount() {
                                 </div>
                             </div>
                         </div>
-                        {/* <!-- PRODUCT TAB AREA END --> */}
                     </div>
                 </div>
             </div>

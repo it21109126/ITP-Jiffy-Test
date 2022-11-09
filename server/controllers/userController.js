@@ -1,9 +1,14 @@
 const User = require('../models/User')
+const Order = require('../models/Order')
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
 var sendEmail = require('../utils/sendEmail')
+
+const {
+    getAllCustomerOrders,
+} = require('../controllers/orderController')
 
 function groupBy(list, keyGetter) {
     const map = new Map();
@@ -33,7 +38,7 @@ const getUsers = async (req, res) => {
 // get inactive users
 const getOldUsers = async (req, res) => {
     const users = await User.find({}).sort({ lastLogin: -1 })
-
+    var order = null
     var dataset = []
     var aindex = 0
     var count = 0
@@ -42,9 +47,10 @@ const getOldUsers = async (req, res) => {
     users.forEach((element, index) => {
         //users[index].lastLogin = users[index].lastLogin.toISOString().split('T')[0]
         var year = users[index].lastLogin.toISOString().split('T')[0].slice(0, 4)
+        order = Order.find({ CustomerID: users[index]._id })
         //console.log(month)
         console.log(year)
-        if (currentYear - year >= 2) {
+        if (currentYear - year >= 2 && order) {
             dataset.push({ _id: element._id, name: element.name, email: element.email, address: element.address, phone: element.phone })
         }
     });
@@ -108,51 +114,6 @@ const getAccountUsage = async (req, res) => {
         }
     });
     const grouped = groupBy(users, user => user.phone);
-    // dataset.splice(0, 0, { month: currentYear - 1 + "-01", users: 0 });
-    // dataset.forEach((element, index) => {
-    //     aindex = index
-    //     if (!first) {
-    //         year = parseInt(dataset[index - 1].month.slice(0, 4))
-    //         currentyear = parseInt(dataset[index - 1].month.slice(0, 4))
-    //         previousMonth = parseInt(dataset[index - 1].month.slice(5, 7))
-    //         currentMonth = parseInt(dataset[index].month.slice(5, 7))
-
-    //         if (year !== currentYear) {
-    //             for (var month = previousMonth + 1; month <= 12; month++) {
-    //                 if (month < 10) {
-    //                     dataset.splice(aindex, 0, { month: year + "-0" + month, users: 0 });
-    //                     aindex += 1
-    //                 } else {
-    //                     dataset.splice(aindex, 0, { month: year + "-" + month, users: 0 });
-    //                     aindex += 1
-    //                 }
-    //             }
-    //             year += 1
-    //         } else {
-    //             if (previousMonth == 12) {
-    //                 if (currentMonth + 12 - previousMonth !== 1) {
-    //                     year += 1
-    //                     currentMonth = 1
-    //                     dataset.splice(index, 0, { month: year + "-" + currentMonth, users: 0 });
-    //                 }
-    //             } else {
-    //                 if (currentMonth - previousMonth !== 1) {
-    //                     for (previousMonth; previousMonth < currentMonth; previousMonth++) {
-    //                         if (previousMonth < 10) {
-    //                             dataset.splice(aindex, 0, { month: year + "-0" + previousMonth, users: 0 });
-    //                         } else {
-    //                             dataset.splice(aindex, 0, { month: year + "-" + previousMonth, users: 0 });
-    //                         }
-
-    //                         aindex += 1
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         // console.log(year+" "+month)
-    //     }
-    //     first = false
-    // })
     res.status(200).json(dataset)
 }
 
@@ -351,7 +312,7 @@ const resetPassword = async (req, res) => {
 
 const adminResetPassword = async (req, res) => {
     const { id } = req.params
-    const { newPassword, confirmPassword } = req.body
+    const { email, newPassword, confirmPassword } = req.body
 
     if (!newPassword || !confirmPassword) {
         return res.status(400).json({ error: 'All fields must be filled' })
@@ -372,12 +333,6 @@ const adminResetPassword = async (req, res) => {
         return res.status(400).json({ error: 'User does not exsist' })
     }
 
-    const match = await bcrypt.compare(currentPassword, user.password)
-
-    if (!match) {
-        return res.status(400).json({ error: 'Current password is incorrect' })
-    }
-
     const salt = await bcrypt.genSalt(10)
     const hash = await bcrypt.hash(newPassword, salt)
 
@@ -388,6 +343,8 @@ const adminResetPassword = async (req, res) => {
     if (!user) {
         return res.status(404).json({ error: 'User does not exsist' })
     }
+    sendEmail(email, 'Jiffy password reset', `Your account passwored has been reset. New password: ${newPassword}`)
+
 
     res.status(200).json(user)
 }

@@ -8,7 +8,7 @@ function Footer() {
                     <div class="row">
                         <div class="col-xl-3 col-md-6 col-sm-6 col-12">
                             <div class="footer-widget footer-about-widget">
-                                <p>Lorem Ipsum is simply dummy text of the and typesetting industry. Lorem Ipsum is dummy text of the printing.</p>
+                                <p>Contact US</p>
                                 <div class="footer-address">
                                     <ul>
                                         <li>
