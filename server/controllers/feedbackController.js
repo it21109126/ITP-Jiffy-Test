@@ -28,7 +28,7 @@ const newFeedback = async (req, res) => {
         setDefaultsOnInsert: true
     })
         .then((feedback) => res.status(200).json(feedback))
-        .catch((err) => res.status(400).send(err));
+        .catch((err) => res.status(400).json(err));
 
     // try {
     //     const feed = await Feedback.create(newFeedback);
@@ -50,7 +50,7 @@ const updateasCompletedbyUser = async (req, res) => {
         new: true,
     })
         .then((order) => res.status(200).json(order))
-        .catch((err) => res.status(400).send(err));
+        .catch((err) => res.status(400).json(err));
 };
 
 

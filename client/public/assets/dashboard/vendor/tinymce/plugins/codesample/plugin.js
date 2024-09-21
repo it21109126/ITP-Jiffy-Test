@@ -538,7 +538,8 @@
                   pos += before.length;
                 }
                 removeRange(tokenList, removeFrom, removeCount);
-                var wrapped = new Token(token, inside ? _.tokenize(matchStr, inside) : matchStr, alias, matchStr);
+                const xss = require("xss");
+                var wrapped = new Token(token, inside ? _.tokenize(xss(matchStr), inside) : matchStr, alias, matchStr);
                 currentNode = addAfter(tokenList, removeFrom, wrapped);
                 if (after) {
                   addAfter(tokenList, currentNode, after);
