@@ -611,10 +611,17 @@
           if (!_.disableWorkerMessageHandler) {
             _self.addEventListener('message', function (evt) {
               var message = JSON.parse(evt.data);
-              if (typeof message !== 'object' || !message) return;
-              var lang = typeof message.language === 'string' ? message.language : '';
-              var code = typeof message.code === 'string' ? message.code : '';
-              var immediateClose = typeof message.immediateClose === 'boolean' ? message.immediateClose : false;
+              if (typeof message !== 'object' || message === null || Array.isArray(message)) {
+                return;
+              }
+              for (var key in message) {
+                if (message.hasOwnProperty(key) && (key === '__proto__' || key === 'constructor' || key === 'prototype')) {
+                  return;
+                }
+              }
+              var lang = message.language;
+              var code = message.code;
+              var immediateClose = message.immediateClose;
               _self.postMessage(_.highlight(code, _.languages[lang], lang));
               if (immediateClose) {
                 _self.close();
