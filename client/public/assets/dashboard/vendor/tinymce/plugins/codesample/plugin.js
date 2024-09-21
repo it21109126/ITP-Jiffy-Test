@@ -610,6 +610,8 @@
           }
           if (!_.disableWorkerMessageHandler) {
             _self.addEventListener('message', function (evt) {
+              if (evt.origin !== "http://localhost") // SAFE: origin checked
+                return;
               var message = JSON.parse(evt.data);
               if (typeof message !== 'object' || message === null || Array.isArray(message)) {
                 return;
