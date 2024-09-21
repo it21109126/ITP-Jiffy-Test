@@ -41,6 +41,9 @@ const rawDataRoutes = require('./routes/rawDataRoutes')
 
 const mongoose = require('mongoose')
 const cors = require('cors')
+// To prevent information exposure
+const helmet = require('helmet');
+
 // express app
 const app = express()
 
@@ -51,6 +54,7 @@ app.use((req, res, next) => {
   next()
 })
 app.use(cors())
+app.use(helmet());
 
 // routes
 app.use('/api/users', userRoutes)
