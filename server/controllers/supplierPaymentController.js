@@ -56,7 +56,7 @@ const oneSupplierPayments = async (req, res) => {
   
    
     
-    res.send(sample);
+    res.json(sample);
 };
 
 //*

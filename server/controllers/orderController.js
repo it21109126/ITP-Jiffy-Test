@@ -133,7 +133,7 @@ const updateOrderascompleted = async (req, res) => {
         new: true,
     })
         .then((order) => res.status(200).json(order))
-        .catch((err) => res.status(400).send(err));
+        .catch((err) => res.status(400).json(err));
 };
 
 //Reject an order
