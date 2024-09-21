@@ -3,7 +3,7 @@ const ProductOrder = require('../models/productOrder')
 // Get all product Orders
 const getAllproductOrders = async (req, res) => {
     const productOrder = await ProductOrder.find();
-    res.send(productOrder);
+    res.json(productOrder);
 }
 
 // Update a product order
