@@ -36,7 +36,7 @@ const getOneSupplierOrder=async (req, res) =>{
 
     const order = await SupplierOrder.findById(req.params.id);
     
-    res.send(order);
+    res.json(order);
 }
 
 //Delete an order
@@ -93,7 +93,7 @@ const updateSupplierOrderPayment = async (req, res) => {
         {new:true}
         );
         sendEmail(req.body.email, 'Payment completed', `We have paid for your ${req.body.rawMaterial}`)
-        res.send(payment);
+        res.json(payment);
 };
 
 
