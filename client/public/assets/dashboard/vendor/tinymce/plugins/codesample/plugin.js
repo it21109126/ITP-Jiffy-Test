@@ -325,7 +325,7 @@
             function insertHighlightedCode(highlightedCode) {
               env.highlightedCode = highlightedCode;
               _.hooks.run('before-insert', env);
-              env.element.innerHTML = env.highlightedCode;
+              env.element.innerText = env.highlightedCode; // To mitigate XSS when the user is using innerHTML
               _.hooks.run('after-highlight', env);
               _.hooks.run('complete', env);
               callback && callback.call(env.element);
