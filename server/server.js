@@ -1,7 +1,11 @@
 require('dotenv').config()
 
+require("./passport-config"); // To allow the passport configuration to run
+
 const express = require('express')
 const multer = require('multer')
+
+const googleOAuthRoutes = require('./routes/google-oauth-routes')
 
 const userRoutes = require('./routes/userRoutes')
 const siteFeedbacks = require('./routes/SiteFeedbackRoutes')
@@ -40,7 +44,8 @@ const machineStatsRoutes = require('./routes/machineStatsRoutes')
 const rawDataRoutes = require('./routes/rawDataRoutes')
 
 const mongoose = require('mongoose')
-const cors = require('cors')
+const cors = require('cors');
+
 // express app
 const app = express()
 
@@ -51,6 +56,25 @@ app.use((req, res, next) => {
   next()
 })
 app.use(cors())
+
+const cookieSession = require('cookie-session');
+const passport = require('passport');
+
+app.use(
+  cookieSession({
+    name: "cookie-session",
+    keys: [`${process.env.COOKIE_KEY}`],
+    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: false,
+  })
+);
+
+// Initialize passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Google oauth routes
+app.use('/auth', googleOAuthRoutes)
 
 // routes
 app.use('/api/users', userRoutes)
