@@ -610,7 +610,17 @@
           }
           if (!_.disableWorkerMessageHandler) {
             _self.addEventListener('message', function (evt) {
+              if (evt.origin !== "http://localhost") // SAFE: origin checked
+                return;
               var message = JSON.parse(evt.data);
+              if (typeof message !== 'object' || message === null || Array.isArray(message)) {
+                return;
+              }
+              for (var key in message) {
+                if (message.hasOwnProperty(key) && (key === '__proto__' || key === 'constructor' || key === 'prototype')) {
+                  return;
+                }
+              }
               var lang = message.language;
               var code = message.code;
               var immediateClose = message.immediateClose;

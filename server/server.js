@@ -44,18 +44,17 @@ const machineStatsRoutes = require('./routes/machineStatsRoutes')
 const rawDataRoutes = require('./routes/rawDataRoutes')
 
 const mongoose = require('mongoose')
-const cors = require('cors');
+const cors = require('cors')
+// To prevent information exposure
+const helmet = require('helmet');
 
 // express app
 const app = express()
 
 // middleware
 app.use(express.json())
-app.use((req, res, next) => {
-  console.log(req.path, req.method)
-  next()
-})
 app.use(cors())
+app.use(helmet());
 
 const cookieSession = require('cookie-session');
 const passport = require('passport');
