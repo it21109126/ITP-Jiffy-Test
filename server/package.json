@@ -28,7 +28,7 @@
     "nodemon": "^2.0.19",
     "validator": "^13.7.0",
     "cookie-session": "^2.1.0",
-    "passport": "^0.5.3",
+    "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
