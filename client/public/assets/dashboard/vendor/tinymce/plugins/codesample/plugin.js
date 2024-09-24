@@ -612,20 +612,34 @@
             _self.addEventListener('message', function (evt) {
               if (evt.origin !== "http://localhost") // SAFE: origin checked
                 return;
-              var message = JSON.parse(evt.data);
+
+              let message;
+              try{
+                message = JSON.parse(evt.data);
+              } catch(e) {
+                  return; // Invalid JSON format 
+              }
               if (typeof message !== 'object' || message === null || Array.isArray(message)) {
                 return;
               }
-              for (var key in message) {
-                if (message.hasOwnProperty(key) && (key === '__proto__' || key === 'constructor' || key === 'prototype')) {
-                  return;
+              // Loop through keys and filter out dangerous ones
+              for (let key in message) {
+                if (Object.hasOwn(message, key) && (key === '__proto__' || key === 'constructor' || key === 'prototype' || key === 'toString' || key === 'valueOf')) {
+                  return; // Return if a dangerous key is detected
                 }
               }
-              var lang = message.language;
-              var code = message.code;
-              var immediateClose = message.immediateClose;
-              _self.postMessage(_.highlight(code, _.languages[lang], lang));
-              if (immediateClose) {
+
+               // Safely extract and use data from message
+              let lang = message.language;
+              let code = message.code;
+              let immediateClose = message.immediateClose;
+
+              const safeMessage = Object.create(null);
+              safeMessage.code = code;
+              safeMessage.language = lang;
+              safeMessage.immediateClose = immediateClose;
+              _self.postMessage(_.highlight(safeMessage.code, _.languages[safeMessage.language], safeMessage.language));
+              if (safeMessage.immediateClose) {
                 _self.close();
               }
             }, false);
