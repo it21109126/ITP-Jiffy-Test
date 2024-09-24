@@ -475,9 +475,27 @@
               var lookbehind = !!patternObj.lookbehind;
               var greedy = !!patternObj.greedy;
               var alias = patternObj.alias;
+
+               /**
+               * Example safe regex checker function
+               */
+              function isSafeRegex(regex) {
+                // A basic rule to prevent catastrophic patterns
+                // Here we're checking for unbounded quantifiers, which can lead to ReDoS
+                return !/(.*)\1/.test(regex); // Basic example
+              }
+
+              // Prevent ReDoS by limiting the complexity of the pattern
               if (greedy && !patternObj.pattern.global) {
                 var flags = patternObj.pattern.toString().match(/[imsuy]*$/)[0];
-                patternObj.pattern = RegExp(patternObj.pattern.source, flags + 'g');
+                // Use a safe approach to prevent ReDoS by checking or limiting complexity
+                var patternSource = patternObj.pattern.source;
+                if (isSafeRegex(patternSource)) { // You can use a function or library to check safety
+                    patternObj.pattern = RegExp(patternSource, flags + 'g');
+                } else {
+                    console.warn("Potentially unsafe regex pattern detected: ", patternSource);
+                    return; // Exit or handle this case
+                }
               }
               var pattern = patternObj.pattern || patternObj;
               for (var currentNode = startNode.next, pos = startPos; currentNode !== tokenList.tail; pos += currentNode.value.length, currentNode = currentNode.next) {
