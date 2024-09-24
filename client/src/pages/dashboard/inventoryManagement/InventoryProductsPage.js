@@ -46,7 +46,7 @@ useEffect(() => {
             let term;
 
             if(searchTerm!==null){
-                term = searchTerm.replace(/[^a-zA-Z0-9_ \d]/, '');
+                term = searchTerm.replace(/[^a-zA-Z\d_ ]/, '');
             }
 
             //const term = searchTerm;
