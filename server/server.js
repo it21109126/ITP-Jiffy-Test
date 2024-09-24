@@ -7,6 +7,9 @@ const multer = require('multer')
 
 const googleOAuthRoutes = require('./routes/google-oauth-routes')
 
+/* CSRF routes */
+const csrfRoutes = require("./routes/csrf-routes");
+
 const userRoutes = require('./routes/userRoutes')
 const siteFeedbacks = require('./routes/SiteFeedbackRoutes')
 
@@ -54,11 +57,16 @@ app.set('trust proxy', 1)
 
 // middleware
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}))
 app.use(helmet());
 
 const cookieSession = require('cookie-session');
 const passport = require('passport');
+
+const cookieParser = require('cookie-parser');
 
 app.use(
   cookieSession({
@@ -75,6 +83,10 @@ app.use(passport.session());
 
 // Google oauth routes
 app.use('/auth', googleOAuthRoutes)
+
+// CSRF routes and cookie-parser middleware
+app.use(cookieParser());
+app.use("/csrf", csrfRoutes);
 
 // routes
 app.use('/api/users', userRoutes)
