@@ -4,6 +4,7 @@ const { doubleCsrf } = require("csrf-csrf");
 
 const doubleCsrfConfig = {
   getSecret: () => process.env.CSRF_SECRET, // A function that optionally takes the request and returns a secret
+  cookieName: "csrf-token", // The name of the cookie that will be set
 };
 
 const { generateToken, doubleCsrfProtection } = doubleCsrf(doubleCsrfConfig);
