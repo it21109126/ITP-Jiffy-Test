@@ -118,7 +118,6 @@ function CustomerAccount() {
         })
         const csrfData = await csrfResponse.json();
         const csrfToken = csrfData.csrfToken;
-        console.log("csrfToken", csrfToken);
 
         const response = await fetch('/api/site-feedbacks', {
           method: 'POST',
