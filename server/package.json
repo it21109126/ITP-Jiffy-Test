@@ -19,7 +19,7 @@
     "cors": "^2.8.5",
     "csrf-csrf": "^3.0.8",
     "dotenv": "^16.0.2",
-    "express": "^4.18.1",
+    "express": "^4.22.0",
     "express-rate-limit": "^7.4.0",
     "express-session": "^1.17.3",
     "helmet": "^7.1.0",
